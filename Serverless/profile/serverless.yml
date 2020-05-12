@@ -22,7 +22,7 @@ provider:
     restApiRootResourceId:
       "Fn::ImportValue": securityTemplateGW-rootResourceId
 functions:
-  get-activities:
+  get-profile:
     handler: functions/get/getProfile.getProfile
     package:
       include:
@@ -32,7 +32,7 @@ functions:
         - templates/**
     events:
       - http:
-          path: profile
+          path: profile/{username}
           method: get
           authorizer:
             type: COGNITO_USER_POOLS
@@ -52,7 +52,7 @@ functions:
           request:
             passThrough: WHEN_NO_TEMPLATES
             template:
-              application/json: ${file(templates/profileGetMappingTemplate.vtl)}
+              application/json: ${file(../gateway/templates/profileGetMappingTemplate.vtl)}
           response:
             statusCodes:
               200:

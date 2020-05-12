@@ -7,16 +7,17 @@ AWS.config.update({region: 'eu-west-2'});
 // Set a table name that we can use later on
 const tableName = "SunSalutation";
 
-
-const PK = "USER#bearclawstu";
-const SK = "METADATA#bearclawstu";
-
 // Create the Document Client interface for DynamoDB
 var ddbDocumentClient = new AWS.DynamoDB.DocumentClient();
 
 // Get a single item with the getItem operation and Document Client
-module.exports.getProfile = async event => {
+module.exports.getProfile = async (event) => {
     try {
+        const userName = event.pathParams.username;
+
+        const PK = "USER#" + userName;
+        const SK = "METADATA#" + userName;
+
         var params = {
             Key: {
                 "PK": PK,
@@ -24,7 +25,7 @@ module.exports.getProfile = async event => {
             },
             TableName: tableName
         };
-        const result = await ddbDocumentClient.get(params).promise()
+        var result = await ddbDocumentClient.get(params).promise()
         return (JSON.stringify(result));
     } catch (error) {
         console.error(error);
