@@ -1,0 +1,40 @@
+service: security-template-gateway
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: eu-west-2
+resources:
+  Resources:
+    securityTemplateGW:
+      Type: AWS::ApiGateway::RestApi
+      Properties:
+        Name: securityTemplateGW
+    securityTemplateCognito:
+      Type: AWS::ApiGateway::Authorizer
+      Properties:
+        AuthorizerResultTtlInSeconds: 300
+        IdentitySource: method.request.header.Authorization
+        Name: securityTemplateGatewayApiGatewayAuthorizer
+        RestApiId:
+          Ref: securityTemplateGW
+        Type: COGNITO_USER_POOLS
+        ProviderARNs:
+          - arn:aws:cognito-idp:eu-west-2:959986573464:userpool/eu-west-2_RA6uetEq9
+  Outputs:
+    apiGatewayRestApiId:
+      Value:
+        Ref: securityTemplateGW
+      Export:
+        Name: securityTemplateGW-restApiId
+    apiGatewayRestApiRootResourceId:
+      Value:
+        Fn::GetAtt:
+          - securityTemplateGW
+          - RootResourceId
+      Export:
+        Name: securityTemplateGW-rootResourceId
+    securityTemplateCognito:
+      Value:
+        Ref: securityTemplateCognito
+      Export:
+        Name: securityTemplateGW-authorizer

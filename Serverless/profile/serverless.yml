@@ -1,0 +1,59 @@
+service: security-template-profile
+
+package:
+  individually: true
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: eu-west-2
+  iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:Query
+          - dynamodb:Scan
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+          - dynamodb:UpdateItem
+          - dynamodb:DeleteItem
+        Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/SunSalutation"
+  apiGateway:
+    restApiId:
+      "Fn::ImportValue": securityTemplateGW-restApiId
+    restApiRootResourceId:
+      "Fn::ImportValue": securityTemplateGW-rootResourceId
+functions:
+  get-activities:
+    handler: functions/get/getProfile.getProfile
+    package:
+      include:
+        - functions/get/getProfile.js
+      exclude:
+        - functions/**
+        - templates/**
+    events:
+      - http:
+          path: profile
+          method: get
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: ${cf:security-template-gateway-dev.securityTemplateCognito}
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: false
+            cacheControl: 'max-age=600, s-maxage=600, proxy-revalidate' # Caches on browser and proxy for 10 minutes and doesnt allow proxy to serve out of date content
+          integration: lambda
+          request:
+            passThrough: WHEN_NO_TEMPLATES
+            template:
+              application/json: ${file(templates/profileGetMappingTemplate.vtl)}
+          response:
+            statusCodes:
+              200:
+                pattern:''
