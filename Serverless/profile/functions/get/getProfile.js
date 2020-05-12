@@ -24,7 +24,7 @@ module.exports.getProfile = async event => {
             },
             TableName: tableName
         };
-        var result = await ddbDocumentClient.get(params).promise()
+        const result = await ddbDocumentClient.get(params).promise()
         return (JSON.stringify(result));
     } catch (error) {
         console.error(error);
