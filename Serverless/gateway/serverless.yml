@@ -133,3 +133,11 @@ resources:
         'Fn::GetAtt': [DynamoTable, Arn]
       Export:
         Name: ${self:custom.serviceName}:TableArn
+    ApiUrl:
+      Description: "The API Gateway URL"
+      Value:
+        Fn::Join:
+          - ""
+          - - "https://"
+            - Ref: SharedGateway
+            - ".execute-api.${self:provider.region}.amazonaws.com/${self:custom.stage}"

@@ -5,8 +5,8 @@
 export const environment = {
   production: false,
   _POOL_DATA: {
-    UserPoolId: 'eu-west-2_RA6uetEq9',
-    ClientId: 'ghe8cfhbfcms25c6eb1fki8kc'
+    UserPoolId: 'eu-west-2_uzfuQf15W',
+    ClientId: '2dtf9mmoq4l4ji1m98b5374f6s'
   }
 };
 
