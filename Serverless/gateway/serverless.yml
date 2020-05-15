@@ -1,40 +1,135 @@
-service: security-template-gateway
+service: securityTemplate
+
+package:
+  individually: true
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  serviceName: ${self:service}-${self:custom.stage}
+
 provider:
   name: aws
   runtime: nodejs12.x
   region: eu-west-2
+  stage: dev
+  environment:
+    TABLE_NAME: ${self:custom.serviceName}
+    REGION: ${self:provider.region}
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamodb:PutItem
+      Resource:
+        Fn::GetAtt:
+          - DynamoTable
+          - Arn
+functions:
+  PostConfirmation:
+    handler: functions/cognitoUserPostConfirmation.handler
+    package:
+      include:
+        - functions/cognitoUserPostConfirmation.js
+      exclude:
+        - functions/**
+        - templates/**
+    events:
+      - cognitoUserPool:
+          pool: MyUserPool
+          trigger: PostConfirmation
 resources:
   Resources:
-    securityTemplateGW:
+    SharedGateway:
       Type: AWS::ApiGateway::RestApi
       Properties:
-        Name: securityTemplateGW
-    securityTemplateCognito:
+        Name: ${self:custom.serviceName}-Gateway
+    CognitoUserPoolMyUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: ${self:custom.serviceName}
+        AutoVerifiedAttributes:
+          - email
+        AliasAttributes:
+          - email
+          - preferred_username
+        UsernameConfiguration:
+          CaseSensitive: False
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 8
+            RequireLowercase: True
+            RequireNumbers: True
+            RequireSymbols: True
+            RequireUppercase: True
+    CognitoUserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        # Generate an app client name based on the stage
+        ClientName: ${self:custom.serviceName}-user-pool-client
+        UserPoolId:
+          Ref: CognitoUserPoolMyUserPool
+        ExplicitAuthFlows:
+          - ADMIN_NO_SRP_AUTH
+        GenerateSecret: false
+    CognitoAuthorizer:
       Type: AWS::ApiGateway::Authorizer
       Properties:
         AuthorizerResultTtlInSeconds: 300
         IdentitySource: method.request.header.Authorization
         Name: securityTemplateGatewayApiGatewayAuthorizer
         RestApiId:
-          Ref: securityTemplateGW
+          Ref: SharedGateway
         Type: COGNITO_USER_POOLS
         ProviderARNs:
-          - arn:aws:cognito-idp:eu-west-2:959986573464:userpool/eu-west-2_RA6uetEq9
+          - {"Fn::Join": ["", ["arn:aws:cognito-idp:", {Ref: "AWS::Region"}, ":", {Ref: "AWS::AccountId"}, ":userpool/", Ref: CognitoUserPoolMyUserPool]]}
+    DynamoTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_NAME}
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
   Outputs:
     apiGatewayRestApiId:
       Value:
-        Ref: securityTemplateGW
+        Ref: SharedGateway
       Export:
-        Name: securityTemplateGW-restApiId
+        Name: sharedGateway-restApiId
     apiGatewayRestApiRootResourceId:
       Value:
         Fn::GetAtt:
-          - securityTemplateGW
+          - SharedGateway
           - RootResourceId
       Export:
-        Name: securityTemplateGW-rootResourceId
-    securityTemplateCognito:
+        Name: ${self:custom.serviceName}:sharedGateway-rootResourceId
+    UserPoolId:
       Value:
-        Ref: securityTemplateCognito
+        Ref: CognitoUserPoolMyUserPool
+    UserPoolClientId:
+      Value:
+        Ref: CognitoUserPoolClient
+    CognitoAuthorizer:
+      Value:
+        Ref: CognitoAuthorizer
       Export:
-        Name: securityTemplateGW-authorizer
+        Name: ${self:custom.serviceName}:cognito-authorizer
+    DynamoDbTable:
+      Value:
+        Ref: DynamoTable
+      Export:
+        Name: ${self:custom.serviceName}:DynamoDbTable
+    DynamoDbTableArn:
+      Description: The ARN for the DynamoDB Table
+      Value:
+        'Fn::GetAtt': [DynamoTable, Arn]
+      Export:
+        Name: ${self:custom.serviceName}:TableArn

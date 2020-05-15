@@ -1,11 +1,12 @@
 // Load the AWS SDK for JS
 var AWS = require("aws-sdk");
 
-// Set a region to interact with (make sure it's the same as the region of your table)
-AWS.config.update({region: 'eu-west-2'});
-
 // Set a table name that we can use later on
-const tableName = "SunSalutation";
+const tableName = process.env.TABLE_NAME;
+const region = process.env.REGION;
+
+// Set a region to interact with (make sure it's the same as the region of your table)
+AWS.config.update({region: region});
 
 // Create the Document Client interface for DynamoDB
 var ddbDocumentClient = new AWS.DynamoDB.DocumentClient();
@@ -25,8 +26,8 @@ module.exports.getProfile = async (event) => {
             },
             TableName: tableName
         };
-        var result = await ddbDocumentClient.get(params).promise()
-        return (JSON.stringify(result));
+        const result = await ddbDocumentClient.get(params).promise()
+        return result;
     } catch (error) {
         console.error(error);
     }

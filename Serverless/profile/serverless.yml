@@ -1,4 +1,8 @@
-service: security-template-profile
+service: securityTemplate-profile
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  serviceName: securityTemplate-${self:custom.stage}
 
 package:
   individually: true
@@ -6,6 +10,10 @@ provider:
   name: aws
   runtime: nodejs12.x
   region: eu-west-2
+  environment:
+    TABLE_NAME:
+      'Fn::ImportValue': ${self:custom.serviceName}:DynamoDbTable
+    REGION: ${self:provider.region}
   iamRoleStatements:
       - Effect: "Allow"
         Action:
@@ -15,12 +23,13 @@ provider:
           - dynamodb:PutItem
           - dynamodb:UpdateItem
           - dynamodb:DeleteItem
-        Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/SunSalutation"
+        Resource:
+          'Fn::ImportValue': ${self:custom.serviceName}:TableArn
   apiGateway:
     restApiId:
-      "Fn::ImportValue": securityTemplateGW-restApiId
+      "Fn::ImportValue": sharedGateway-restApiId
     restApiRootResourceId:
-      "Fn::ImportValue": securityTemplateGW-rootResourceId
+      "Fn::ImportValue": ${self:custom.serviceName}:sharedGateway-rootResourceId
 functions:
   get-profile:
     handler: functions/get/getProfile.getProfile
@@ -29,14 +38,14 @@ functions:
         - functions/get/getProfile.js
       exclude:
         - functions/**
-        - templates/**
     events:
       - http:
           path: profile/{username}
           method: get
           authorizer:
             type: COGNITO_USER_POOLS
-            authorizerId: ${cf:security-template-gateway-dev.securityTemplateCognito}
+            authorizerId:
+              "Fn::ImportValue": ${self:custom.serviceName}:cognito-authorizer
           cors:
             origin: '*'
             headers:
