@@ -25,4 +25,8 @@ export class ProfileService {
             })
         )
   }
+
+    updateUserProfile(profile : UserProfile): Observable<any> {
+        return this.http.post<any>(`profile`, profile);
+    }
 }

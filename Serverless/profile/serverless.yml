@@ -61,7 +61,42 @@ functions:
           request:
             passThrough: WHEN_NO_TEMPLATES
             template:
-              application/json: ${file(../gateway/templates/profileGetMappingTemplate.vtl)}
+              application/json: ${file(../gateway/templates/genericMappingTemplate.vtl)}
+          response:
+            statusCodes:
+              200:
+                pattern:''
+  update-profile:
+    handler: functions/post/updateProfile.updateProfile
+    package:
+      include:
+        - functions/post/updateProfile.js
+      exclude:
+        - functions/**
+    events:
+      - http:
+          path: profile
+          method: post
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              "Fn::ImportValue": ${self:custom.serviceName}:cognito-authorizer
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: false
+            cacheControl: 'max-age=600, s-maxage=600, proxy-revalidate' # Caches on browser and proxy for 10 minutes and doesnt allow proxy to serve out of date content
+          integration: lambda
+          request:
+            passThrough: WHEN_NO_TEMPLATES
+            template:
+              application/json: ${file(../gateway/templates/genericMappingTemplate.vtl)}
           response:
             statusCodes:
               200:

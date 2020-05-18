@@ -61,12 +61,20 @@ export class ProfilePage implements OnInit {
                     text: 'Ok',
                     handler: data => {
                         this.userProfile.name = data.name;
+                        this.saveProfile();
                     }
                 }
             ]
         }).then(alertEl => {
             alertEl.present();
         });
+    }
+
+    saveProfile() {
+        this.profileService.updateUserProfile(this.userProfile)
+            .subscribe(result => {
+                console.log('success');
+            })
     }
 
 }

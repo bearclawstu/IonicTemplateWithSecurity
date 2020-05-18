@@ -55,5 +55,10 @@ That should take you to a page allowing you to sign in/sign up.
 Once the email address has been verified, it will take you to the home page and 
 a user will have been added to your dynamoDB table.
 
+###Clean up
+To remove all of the resources in AWS, run the following in the serverless direcrtory
+```
+ci-decomission.sh
+```
 
 
