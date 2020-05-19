@@ -1,19 +1,12 @@
 
-var aws = require('aws-sdk');
-var ddb = new aws.DynamoDB({apiVersion: '2012-10-08'});
+var DynamoDB = require('aws-sdk/clients/dynamodb');
+var ddbDocumentClient = new DynamoDB.DocumentClient();
 
 exports.handler = async (event, context) => {
-    console.log(event);
-
     let date = new Date();
 
     const tableName = process.env.TABLE_NAME;
-    const region = process.env.REGION;
     const defaultAvi = 'https://YOUR/DEFAULT/IMAGE';
-
-    console.log("table=" + tableName + " -- region=" + region);
-
-    aws.config.update({region: region});
 
     // If the required parameters are present, proceed
     if (event.request.userAttributes.sub) {
@@ -21,21 +14,21 @@ exports.handler = async (event, context) => {
         // -- Write data to DDB
         let ddbParams = {
             Item: {
-                'PK': {S: 'USER#' + event.userName},
-                'SK':  {S: 'METADATA#' + event.userName},
-                'id': {S: event.request.userAttributes.sub},
-                '__typename': {S: 'User'},
-                'picture': {S: defaultAvi},
-                'username': {S: event.userName},
-                'email': {S: event.request.userAttributes.email},
-                'createdAt': {S: date.toISOString()},
+                'PK': 'USER#' + event.userName,
+                'SK': 'METADATA#' + event.userName,
+                'id': event.request.userAttributes.sub,
+                '__typename': 'User',
+                'picture': defaultAvi,
+                'username': event.userName,
+                'email': event.request.userAttributes.email,
+                'createdAt': date.toISOString(),
             },
             TableName: tableName
         };
 
         // Call DynamoDB
         try {
-            await ddb.putItem(ddbParams).promise()
+            await ddbDocumentClient.put(ddbParams).promise()
             console.log("Success");
         } catch (err) {
             console.log("Error", err);

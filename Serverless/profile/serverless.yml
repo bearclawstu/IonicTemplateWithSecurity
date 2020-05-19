@@ -14,6 +14,7 @@ provider:
     TABLE_NAME:
       'Fn::ImportValue': ${self:custom.serviceName}:DynamoDbTable
     REGION: ${self:provider.region}
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
   iamRoleStatements:
       - Effect: "Allow"
         Action:

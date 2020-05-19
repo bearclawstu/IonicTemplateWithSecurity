@@ -1,15 +1,11 @@
 // Load the AWS SDK for JS
-var AWS = require("aws-sdk");
+var DynamoDB = require('aws-sdk/clients/dynamodb');
 
 // Set a table name that we can use later on
 const tableName = process.env.TABLE_NAME;
-const region = process.env.REGION;
-
-// Set a region to interact with (make sure it's the same as the region of your table)
-AWS.config.update({region: region});
 
 // Create the Document Client interface for DynamoDB
-var ddbDocumentClient = new AWS.DynamoDB.DocumentClient();
+var ddbDocumentClient = new DynamoDB.DocumentClient();
 
 // Get a single item with the getItem operation and Document Client
 module.exports.getProfile = async (event) => {
