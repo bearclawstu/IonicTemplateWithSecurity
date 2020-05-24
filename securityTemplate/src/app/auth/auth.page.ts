@@ -23,12 +23,11 @@ export class AuthPage implements OnInit {
 
   authenticate(username: string, password: string, professional: boolean) {
     this.isLoading = true;
-    this.authService.login();
     this.loadingCtrl.create({
       keyboardClose: true, message: 'Logging in....'
     }).then(loadingEl => {
       loadingEl.present();
-      this.authService.authenticate(username, password)
+      this.authService.authenticateWithAWS(username, password)
           .then(res => {
             this.isLoading = false;
             loadingEl.dismiss();
@@ -46,7 +45,6 @@ export class AuthPage implements OnInit {
   }
 
   onSubmit(form: NgForm) {
-    console.log('here');
     if (!form.valid) {
       console.log('not valid');
       return;
@@ -55,7 +53,6 @@ export class AuthPage implements OnInit {
     const email = form.value.email;
     const password = form.value.password;
     const username = form.value.username;
-    console.log(email, password);
 
     if (this.isLogin) {
       this.authenticate(username, password, true);
@@ -75,6 +72,10 @@ export class AuthPage implements OnInit {
 
   onSwitchAuthMode() {
     this.isLogin = !this.isLogin;
+  }
+
+  onForgotPassword() {
+    this.router.navigateByUrl('/forgot-password');
   }
 
   promptVerificationCode(username: string, pw: string) {

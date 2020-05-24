@@ -61,10 +61,6 @@ export class AuthService {
 
   constructor() { }
 
-  login() {
-    this._userIsAuthenticated = true;
-  }
-
   logout() {
     console.log('logging out');
     this._user.next(null);
@@ -151,7 +147,7 @@ export class AuthService {
     });
   }
 
-  authenticate(email, password) {
+  authenticateWithAWS(email, password) {
     return new Promise((resolved, reject) => {
       const userPool = new AWSCognito.CognitoUserPool(environment._POOL_DATA);
 
@@ -169,7 +165,6 @@ export class AuthService {
         onSuccess: result => {
           resolved(result);
           this.setUserData(result);
-          console.log(result.getAccessToken().getJwtToken());
         },
         onFailure: err => {
           reject(err);
@@ -214,7 +209,6 @@ export class AuthService {
           obs.complete();
         } else {
           obs.next(data.getIdToken().getJwtToken());
-          console.log(data.getIdToken().getJwtToken());
           obs.complete();
           // return data.getAccessToken().getJwtToken();
         }
@@ -306,5 +300,52 @@ export class AuthService {
         }
       });
     });
+  }
+
+  forgotPassword(userName) {
+    return new Promise((resolved, reject) => {
+      const userPool = new AWSCognito.CognitoUserPool(environment._POOL_DATA);
+
+      const cognitoUser = new AWSCognito.CognitoUser({
+        Username: userName,
+        Pool: userPool
+      });
+
+      // call forgotPassword on cognitoUser
+      cognitoUser.forgotPassword({
+        onSuccess: function(result) {
+          console.log('call result: ' + result);
+        },
+        onFailure: function(err) {
+          reject(err);
+        },
+        inputVerificationCode: function(data) { // this is optional, and likely won't be implemented as in AWS's example (i.e, prompt to get info)
+          console.log('verification data', data);
+          resolved(data);
+        }
+      });
+    });
+  }
+
+  confirmPassword(userName: string, verificationCode: string, newPassword: string) {
+    return new Promise((resolved, reject) => {
+      const userPool = new AWSCognito.CognitoUserPool(environment._POOL_DATA);
+
+      const cognitoUser = new AWSCognito.CognitoUser({
+        Username: userName,
+        Pool: userPool
+      });
+
+      cognitoUser.confirmPassword(verificationCode, newPassword, {
+        onSuccess: () => {
+          resolved("success");
+        },
+        onFailure: (error) => {
+          console.error(error.message)
+          console.error(error.stack)
+          reject(error);
+        }
+      });
+    })
   }
 }
