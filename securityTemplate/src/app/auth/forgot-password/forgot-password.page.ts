@@ -1,64 +1,90 @@
-import { Component, OnInit } from '@angular/core';
-import {NgForm} from "@angular/forms";
+import {Component, OnInit} from '@angular/core';
+import {FormBuilder, FormGroup, NgForm, Validators} from "@angular/forms";
 import {AuthService} from "../auth.service";
 import {Router} from "@angular/router";
 import {AlertController, LoadingController} from "@ionic/angular";
+import {PasswordValidator} from "../../validators/password";
 
 @Component({
-  selector: 'app-forgot-password',
-  templateUrl: './forgot-password.page.html',
-  styleUrls: ['./forgot-password.page.scss'],
+    selector: 'app-forgot-password',
+    templateUrl: './forgot-password.page.html',
+    styleUrls: ['./forgot-password.page.scss'],
 })
 export class ForgotPasswordPage implements OnInit {
-  promptSent = false;
-  isLoading = false;
+    promptSent = true;
+    isLoading = false;
+    forgotPasswordForm: FormGroup;
+    resetPasswordForm: FormGroup;
 
-  constructor(private authService: AuthService,
-              private router: Router,
-              private loadingCtrl: LoadingController,
-              private alertCtrl: AlertController) { }
+    constructor(private authService: AuthService,
+                private router: Router,
+                private loadingCtrl: LoadingController,
+                private alertCtrl: AlertController,
+                private formBuilder: FormBuilder) {
 
-  ngOnInit() {
-  }
+        this.forgotPasswordForm = formBuilder.group({
+            username: ['', Validators.required]
+        });
 
-  onSubmit(form: NgForm) {
-    if (!form.valid) {
-      console.log('not valid');
-      return;
+        this.resetPasswordForm = formBuilder.group({
+            verificationCode: ['', Validators.required],
+            newPassword: ['', Validators.compose([Validators.required, Validators.pattern('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$')])],
+            confirmPassword: ['', Validators.compose([Validators.required,
+                Validators.pattern('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$'),
+                PasswordValidator.isValid])]
+        });
     }
 
-    // TODO add verification for passwords etc
-    const userName = form.value.userName;
-    const verificationCode = form.value.verificationCode;
-    const password = form.value.password;
-    const confirmPassword = form.value.confPassword;
-
-    console.log(form);
-
-    if (!this.promptSent) {
-      this.authService.forgotPassword(userName).then(
-          res => {
-            this.promptSent = !this.promptSent;
-            this.showVerificationDetailsAlert(res);
-            console.log(res);
-          },
-          err => {
-            console.log(err);
-            this.showErrorMessage(err.message);
-          }
-      );
-    } else {
-      this.authService.confirmPassword(userName, verificationCode, password).then(
-          res => {
-            console.log("success");
-            this.authenticate(userName, password)
-          },
-          err => {
-            console.log(err);
-          }
-      )
+    ngOnInit() {
     }
-  }
+
+    onSubmitForgotPassword() {
+
+        if (!this.forgotPasswordForm.valid) {
+            console.log('not valid');
+            return;
+        }
+
+        // TODO add verification for passwords etc
+        const userName = this.forgotPasswordForm.value.username;
+        this.authService.forgotPassword(userName).then(
+            res => {
+                this.promptSent = !this.promptSent;
+                this.showVerificationDetailsAlert(res);
+                console.log(res);
+            },
+            err => {
+                console.log(err);
+                this.showErrorMessage(err.message);
+            }
+        );
+
+    }
+
+    onSubmitResetPassword() {
+
+        if (!this.resetPasswordForm.valid) {
+            console.log('not valid');
+            return;
+        }
+
+        // TODO add verification for passwords etc
+        const userName = this.forgotPasswordForm.value.username;
+        const verificationCode = this.resetPasswordForm.value.verificationCode;
+        const password = this.resetPasswordForm.value.password;
+        const confirmPassword = this.resetPasswordForm.value.confPassword;
+
+        this.authService.confirmPassword(userName, verificationCode, password).then(
+            res => {
+                console.log("success");
+                this.authenticate(userName, password)
+            },
+            err => {
+                console.log(err);
+            }
+        )
+
+    }
 
     authenticate(username: string, password: string) {
         this.isLoading = true;
@@ -98,7 +124,6 @@ export class ForgotPasswordPage implements OnInit {
             alertEl.present();
         });
     }
-
 
 
     showErrorMessage(message: string) {
