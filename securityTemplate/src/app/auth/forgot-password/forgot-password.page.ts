@@ -4,6 +4,7 @@ import {AuthService} from "../auth.service";
 import {Router} from "@angular/router";
 import {AlertController, LoadingController} from "@ionic/angular";
 import {PasswordValidator} from "../../validators/password";
+import {VerificationCodeValidator} from "../../validators/verificationCode";
 
 @Component({
     selector: 'app-forgot-password',
@@ -11,7 +12,7 @@ import {PasswordValidator} from "../../validators/password";
     styleUrls: ['./forgot-password.page.scss'],
 })
 export class ForgotPasswordPage implements OnInit {
-    promptSent = true;
+    promptSent = false;
     isLoading = false;
     forgotPasswordForm: FormGroup;
     resetPasswordForm: FormGroup;
@@ -27,11 +28,11 @@ export class ForgotPasswordPage implements OnInit {
         });
 
         this.resetPasswordForm = formBuilder.group({
-            verificationCode: ['', Validators.required],
-            newPassword: ['', Validators.compose([Validators.required, Validators.pattern('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$')])],
-            confirmPassword: ['', Validators.compose([Validators.required,
-                Validators.pattern('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$'),
-                PasswordValidator.isValid])]
+            verificationCode: ['', Validators.compose([Validators.required, VerificationCodeValidator.isValid])],
+            newPassword: ['', Validators.compose([Validators.required, PasswordValidator.isValid,
+                PasswordValidator.newPasswordsMatch])],
+            confirmPassword: ['', Validators.compose([Validators.required, PasswordValidator.isValid,
+                PasswordValidator.confirmPasswordsMatch])]
         });
     }
 
@@ -70,9 +71,8 @@ export class ForgotPasswordPage implements OnInit {
 
         // TODO add verification for passwords etc
         const userName = this.forgotPasswordForm.value.username;
-        const verificationCode = this.resetPasswordForm.value.verificationCode;
-        const password = this.resetPasswordForm.value.password;
-        const confirmPassword = this.resetPasswordForm.value.confPassword;
+        const verificationCode = this.resetPasswordForm.value.verificationCode.toString();
+        const password = this.resetPasswordForm.value.newPassword;
 
         this.authService.confirmPassword(userName, verificationCode, password).then(
             res => {
