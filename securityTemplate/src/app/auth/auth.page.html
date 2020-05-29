@@ -31,20 +31,27 @@
             <ion-item *ngIf="!passwordCtrl.valid && passwordCtrl.touched" lines="none">
               <ion-label>Should be at least 6 characters long.</ion-label>
             </ion-item>
+            <ion-button color="primary" fill="clear" size="small" (click)="onForgotPassword()">
+              Forgot your password?
+            </ion-button>
           </ion-list>
         </ion-col>
       </ion-row>
       <ion-row>
         <ion-col sizeSm="6" offsetSm="3">
-          <ion-button color="primary" fill="clear" expand="block" (click)="onSwitchAuthMode()">
-            Switch to {{ isLogin ? 'Signup' : 'Login'}}
-          </ion-button>
           <ion-button type="submit" color="primary"  expand="block" [disabled]="!f.valid">
-            {{ isLogin ? 'Login' : 'Signup'}}
+            {{ isLogin ? 'Sign in' : 'Sign up'}}
           </ion-button>
-          <ion-button color="primary" fill="clear" (click)="onForgotPassword()">
-            Forgot password
-          </ion-button>
+        </ion-col>
+      </ion-row>
+      <ion-row no-padding>
+        <ion-col sizeSm="6" offsetSm="3">
+          <ion-item lines="none">
+            <ion-label align="center">{{ isLogin ? 'Need an account?' : 'Already have an account?'}}</ion-label>
+            <ion-button color="primary" fill="clear" (click)="onSwitchAuthMode()">
+              {{ isLogin ? 'Sign up' : 'Sign in'}}
+            </ion-button>
+          </ion-item>
         </ion-col>
       </ion-row>
     </ion-grid>
