@@ -3,13 +3,10 @@ import {FormControl, FormGroup} from "@angular/forms";
 export class PasswordValidator {
     static confirmPasswordsMatch(control: FormControl): any {
 
-        console.log(control);
         if (!control.parent || !control.parent.value
             || !control.parent.value.confirmPassword || !control.parent.value.newPassword) {
             return null;
         }
-
-        console.log(control.parent.value.newPassword, control.value);
 
         if (control.parent.value.newPassword === control.value) {
             return null;
@@ -23,8 +20,6 @@ export class PasswordValidator {
         if (!control.parent || !control.parent.value || !control.parent.value.confirmPassword) {
             return null;
         }
-
-        console.log(control.value, control.parent.value.confirmPassword);
 
         if (control.value === control.parent.value.confirmPassword) {
             return null;

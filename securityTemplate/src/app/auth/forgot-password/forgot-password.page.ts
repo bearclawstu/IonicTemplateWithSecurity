@@ -46,16 +46,13 @@ export class ForgotPasswordPage implements OnInit {
             return;
         }
 
-        // TODO add verification for passwords etc
         const userName = this.forgotPasswordForm.value.username;
         this.authService.forgotPassword(userName).then(
             res => {
                 this.promptSent = !this.promptSent;
                 this.showVerificationDetailsAlert(res);
-                console.log(res);
             },
             err => {
-                console.log(err);
                 this.showErrorMessage(err.message);
             }
         );
@@ -76,7 +73,6 @@ export class ForgotPasswordPage implements OnInit {
 
         this.authService.confirmPassword(userName, verificationCode, password).then(
             res => {
-                console.log("success");
                 this.authenticate(userName, password)
             },
             err => {
@@ -97,7 +93,6 @@ export class ForgotPasswordPage implements OnInit {
                     this.isLoading = false;
                     loadingEl.dismiss();
                     this.router.navigateByUrl('/home');
-                    console.log(res);
                 }, err => {
                     this.isLoading = false;
                     loadingEl.dismiss();
@@ -114,10 +109,7 @@ export class ForgotPasswordPage implements OnInit {
             buttons: [
                 {
                     text: 'OK',
-                    role: 'cancel',
-                    handler: data => {
-                        console.log('alert dismissed');
-                    }
+                    role: 'cancel'
                 }
             ]
         }).then(alertEl => {
@@ -133,10 +125,7 @@ export class ForgotPasswordPage implements OnInit {
             buttons: [
                 {
                     text: 'OK',
-                    role: 'cancel',
-                    handler: data => {
-                        console.log('alert dismissed');
-                    }
+                    role: 'cancel'
                 }
             ]
         }).then(alertEl => {

@@ -28,13 +28,11 @@ exports.handler = async (event, context) => {
 
         // Call DynamoDB
         try {
-            await ddbDocumentClient.put(ddbParams).promise()
-            console.log("Success");
+            await ddbDocumentClient.put(ddbParams).promise();
         } catch (err) {
             console.log("Error", err);
         }
 
-        console.log("Success: Everything executed correctly");
         context.done(null, event);
 
     } else {
