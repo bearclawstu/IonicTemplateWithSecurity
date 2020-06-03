@@ -104,7 +104,7 @@ resources:
       Value:
         Ref: SharedGateway
       Export:
-        Name: sharedGateway-restApiId
+        Name: ${self:custom.serviceName}:sharedGateway-restApiId
     apiGatewayRestApiRootResourceId:
       Value:
         Fn::GetAtt:

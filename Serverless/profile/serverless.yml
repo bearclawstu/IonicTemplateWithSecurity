@@ -1,5 +1,8 @@
 service: securityTemplate-profile
 
+org: bearclawsolutions
+app: security-template
+
 custom:
   stage: ${opt:stage, self:provider.stage}
   serviceName: securityTemplate-${self:custom.stage}
@@ -28,11 +31,11 @@ provider:
           'Fn::ImportValue': ${self:custom.serviceName}:TableArn
   apiGateway:
     restApiId:
-      "Fn::ImportValue": sharedGateway-restApiId
+      "Fn::ImportValue": ${self:custom.serviceName}:sharedGateway-restApiId
     restApiRootResourceId:
       "Fn::ImportValue": ${self:custom.serviceName}:sharedGateway-rootResourceId
 functions:
-  get-profile:
+  getProfile:
     handler: functions/get/getProfile.getProfile
     package:
       include:
@@ -67,7 +70,7 @@ functions:
             statusCodes:
               200:
                 pattern:''
-  update-profile:
+  updateProfile:
     handler: functions/post/updateProfile.updateProfile
     package:
       include:

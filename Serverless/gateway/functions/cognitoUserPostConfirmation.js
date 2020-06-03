@@ -7,6 +7,8 @@ exports.handler = async (event, context) => {
 
     const tableName = process.env.TABLE_NAME;
     const defaultAvi = 'https://YOUR/DEFAULT/IMAGE';
+    const primaryKey = 'USER#' + event.userName;
+    const sortKey = 'METADATA#' + event.userName;
 
     // If the required parameters are present, proceed
     if (event.request.userAttributes.sub) {
@@ -14,8 +16,8 @@ exports.handler = async (event, context) => {
         // -- Write data to DDB
         let ddbParams = {
             Item: {
-                'PK': 'USER#' + event.userName,
-                'SK': 'METADATA#' + event.userName,
+                'PK': primaryKey,
+                'SK': sortKey,
                 'id': event.request.userAttributes.sub,
                 '__typename': 'User',
                 'picture': defaultAvi,
@@ -23,7 +25,15 @@ exports.handler = async (event, context) => {
                 'email': event.request.userAttributes.email,
                 'createdAt': date.toISOString(),
             },
-            TableName: tableName
+            TableName: tableName,
+            ConditionExpression: 'PK <> :pkey AND #SK <> :skey',
+            ExpressionAttributeNames: {
+                '#SK' : 'SK'
+            },
+            ExpressionAttributeValues: {
+                ':pkey' : primaryKey,
+                ':skey' : sortKey
+            }
         };
 
         // Call DynamoDB

@@ -2,7 +2,8 @@ import {Component, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {AuthService} from './auth.service';
 import {AlertController, LoadingController} from '@ionic/angular';
-import {NgForm} from '@angular/forms';
+import {FormBuilder, FormGroup, NgForm, Validators} from '@angular/forms';
+import {PasswordValidator} from "../validators/password";
 
 @Component({
     selector: 'app-auth',
@@ -12,14 +13,48 @@ import {NgForm} from '@angular/forms';
 export class AuthPage implements OnInit {
     isLoading = false;
     isLogin = true;
+    signInForm: FormGroup;
+    signUpForm: FormGroup;
 
     constructor(private authService: AuthService,
                 private router: Router,
                 private loadingCtrl: LoadingController,
-                private alertController: AlertController) {
+                private alertController: AlertController,
+                private formBuilder: FormBuilder) {
     }
 
     ngOnInit() {
+        this.signInForm = this.formBuilder.group({
+            username: ['', Validators.required],
+            password: ['', Validators.compose([Validators.required, PasswordValidator.isValid])]
+        });
+
+        this.signUpForm = this.formBuilder.group({
+            email: ['', Validators.compose([Validators.required, Validators.email])],
+            username: ['', Validators.required],
+            newPassword: ['', Validators.compose([Validators.required, PasswordValidator.isValid,
+                PasswordValidator.newPasswordsMatch])],
+            confirmPassword: ['', Validators.compose([Validators.required, PasswordValidator.isValid,
+                PasswordValidator.confirmPasswordsMatch])]
+        });
+    }
+
+    ionViewWillEnter() {
+        this.signUpForm.reset();
+        this.signInForm.reset();
+        this.isLogin = true;
+    }
+
+    onSignIn() {
+        if (!this.signInForm.valid) {
+            console.log('not valid');
+            return;
+        }
+
+        const password = this.signInForm.value.password;
+        const username = this.signInForm.value.username;
+
+        this.authenticate(username, password, true);
     }
 
     authenticate(username: string, password: string, professional: boolean) {
@@ -44,28 +79,25 @@ export class AuthPage implements OnInit {
         });
     }
 
-    onSubmit(form: NgForm) {
-        if (!form.valid) {
+    onSignUp() {
+        if (!this.signUpForm.valid) {
             console.log('not valid');
             return;
         }
 
-        const email = form.value.email;
-        const password = form.value.password;
-        const username = form.value.username;
+        const email = this.signUpForm.value.email;
+        const password = this.signUpForm.value.newPassword;
+        const username = this.signUpForm.value.username;
 
-        if (this.isLogin) {
-            this.authenticate(username, password, true);
-        } else {
-            this.authService.signUp(username, email, password).then(
-                res => {
-                    this.promptVerificationCode(username, password);
-                },
-                err => {
-                    console.log(err);
-                }
-            );
-        }
+        this.authService.signUp(username, email, password).then(
+            res => {
+                this.promptVerificationCode(username, password);
+            },
+            err => {
+                console.log(err);
+            }
+        );
+
     }
 
     onSwitchAuthMode() {
