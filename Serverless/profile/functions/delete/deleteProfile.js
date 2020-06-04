@@ -8,9 +8,9 @@ const tableName = process.env.TABLE_NAME;
 var ddbDocumentClient = new DynamoDB.DocumentClient();
 
 // Get a single item with the getItem operation and Document Client
-module.exports.getProfile = async (event) => {
+module.exports.deleteProfile = async (event) => {
     try {
-        const username = event.pathParams.username;
+        const username = event.body.username;
 
         const PK = "USER#" + username;
         const SK = "METADATA#" + username;
@@ -22,7 +22,7 @@ module.exports.getProfile = async (event) => {
             },
             TableName: tableName
         };
-        const result = await ddbDocumentClient.get(params).promise()
+        const result = await ddbDocumentClient.delete(params).promise()
         return result;
     } catch (error) {
         console.error(error);

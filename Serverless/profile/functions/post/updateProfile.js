@@ -10,11 +10,11 @@ var ddbDocumentClient = new DynamoDB.DocumentClient();
 // Get a single item with the getItem operation and Document Client
 module.exports.updateProfile = async (event) => {
   try {
-    const userName = event.body.userName;
+    const username = event.body.username;
     const name = event.body.name;
 
-    const PK = "USER#" + userName;
-    const SK = "METADATA#" + userName;
+    const PK = "USER#" + username;
+    const SK = "METADATA#" + username;
 
     var params = {
       Key: {

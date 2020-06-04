@@ -10,7 +10,7 @@ import {HomeService} from "./home.service";
 export class HomePage implements OnInit {
   personalCount = 0;
   totalCount = 80;
-  userName: string;
+  username: string;
 
   constructor(private authService: AuthService,
               private homeService: HomeService) {}
@@ -18,7 +18,7 @@ export class HomePage implements OnInit {
   ngOnInit() {
     this.authService.getCurrentUser()
         .subscribe(user => {
-          this.userName = user.username;
+          this.username = user.username;
         });
   }
 

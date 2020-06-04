@@ -5,6 +5,7 @@ import {Router} from "@angular/router";
 import {AlertController, LoadingController} from "@ionic/angular";
 import {PasswordValidator} from "../../validators/password";
 import {VerificationCodeValidator} from "../../validators/verificationCode";
+import {ErrorService} from "../../shared/error.service";
 
 @Component({
     selector: 'app-forgot-password',
@@ -21,7 +22,8 @@ export class ForgotPasswordPage implements OnInit {
                 private router: Router,
                 private loadingCtrl: LoadingController,
                 private alertCtrl: AlertController,
-                private formBuilder: FormBuilder) {
+                private formBuilder: FormBuilder,
+                private errorService: ErrorService) {
 
         this.forgotPasswordForm = formBuilder.group({
             username: ['', Validators.required]
@@ -46,14 +48,14 @@ export class ForgotPasswordPage implements OnInit {
             return;
         }
 
-        const userName = this.forgotPasswordForm.value.username;
-        this.authService.forgotPassword(userName).then(
+        const username = this.forgotPasswordForm.value.username;
+        this.authService.forgotPassword(username).then(
             res => {
                 this.promptSent = !this.promptSent;
                 this.showVerificationDetailsAlert(res);
             },
             err => {
-                this.showErrorMessage(err.message);
+                this.errorService.showErrorMessage('An error occurred', err.message, err.code);
             }
         );
 
@@ -67,13 +69,13 @@ export class ForgotPasswordPage implements OnInit {
         }
 
         // TODO add verification for passwords etc
-        const userName = this.forgotPasswordForm.value.username;
+        const username = this.forgotPasswordForm.value.username;
         const verificationCode = this.resetPasswordForm.value.verificationCode.toString();
         const password = this.resetPasswordForm.value.newPassword;
 
-        this.authService.confirmPassword(userName, verificationCode, password).then(
+        this.authService.confirmPassword(username, verificationCode, password).then(
             res => {
-                this.authenticate(userName, password)
+                this.authenticate(username, password)
             },
             err => {
                 console.log(err);
@@ -106,22 +108,6 @@ export class ForgotPasswordPage implements OnInit {
             header: 'Verification sent',
             message: 'You should receive an email with a verification code at ' + data.CodeDeliveryDetails.Destination +
                 '.  Enter that code here along with a new password.',
-            buttons: [
-                {
-                    text: 'OK',
-                    role: 'cancel'
-                }
-            ]
-        }).then(alertEl => {
-            alertEl.present();
-        });
-    }
-
-
-    showErrorMessage(message: string) {
-        const alert = this.alertCtrl.create({
-            header: 'An error occurred',
-            message: message,
             buttons: [
                 {
                     text: 'OK',

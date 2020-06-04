@@ -126,12 +126,12 @@ export class AuthService {
         });
     }
 
-    confirmUser(verificationCode, userName) {
+    confirmUser(verificationCode, username) {
         return new Promise((resolved, reject) => {
             const userPool = new AWSCognito.CognitoUserPool(environment._POOL_DATA);
 
             const cognitoUser = new AWSCognito.CognitoUser({
-                Username: userName,
+                Username: username,
                 Pool: userPool
             });
 
@@ -201,7 +201,6 @@ export class AuthService {
                 obs.complete();
                 return;
             }
-
 
             cognitoUser.getSession(function (err, data) {
                 if (err) {
@@ -283,12 +282,12 @@ export class AuthService {
         Plugins.Storage.set({key: 'authData', value: data});
     }
 
-    resendVerificationCode(userName) {
+    resendVerificationCode(username) {
         return new Promise((resolved, reject) => {
             const userPool = new AWSCognito.CognitoUserPool(environment._POOL_DATA);
 
             const cognitoUser = new AWSCognito.CognitoUser({
-                Username: userName,
+                Username: username,
                 Pool: userPool
             });
 
@@ -302,12 +301,12 @@ export class AuthService {
         });
     }
 
-    forgotPassword(userName) {
+    forgotPassword(username) {
         return new Promise((resolved, reject) => {
             const userPool = new AWSCognito.CognitoUserPool(environment._POOL_DATA);
 
             const cognitoUser = new AWSCognito.CognitoUser({
-                Username: userName,
+                Username: username,
                 Pool: userPool
             });
 
@@ -327,12 +326,12 @@ export class AuthService {
         });
     }
 
-    confirmPassword(userName: string, verificationCode: string, newPassword: string) {
+    confirmPassword(username: string, verificationCode: string, newPassword: string) {
         return new Promise((resolved, reject) => {
             const userPool = new AWSCognito.CognitoUserPool(environment._POOL_DATA);
 
             const cognitoUser = new AWSCognito.CognitoUser({
-                Username: userName,
+                Username: username,
                 Pool: userPool
             });
 
@@ -344,6 +343,34 @@ export class AuthService {
                     console.error(error.message)
                     console.error(error.stack)
                     reject(error);
+                }
+            });
+        })
+    }
+
+    deleteUserProfile(username: string, password: string) {
+        return new Promise((resolved, reject) => {
+            const userPool = new AWSCognito.CognitoUserPool(environment._POOL_DATA);
+
+            var authenticationDetails = new AWSCognito.AuthenticationDetails({
+                Username: username,
+                Password: password,
+            });
+            const cognitoUser = userPool.getCurrentUser();
+
+            cognitoUser.authenticateUser(authenticationDetails, {
+                onSuccess: result => {
+                    cognitoUser.deleteUser((err, result) => {
+                        if (err) {
+                            console.log(err);
+                            reject(err);
+                        } else {
+                            resolved("success");
+                        }
+                    });
+                },
+                onFailure: err => {
+                    reject(err);
                 }
             });
         })
