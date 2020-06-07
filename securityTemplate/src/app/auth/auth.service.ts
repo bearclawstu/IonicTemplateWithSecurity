@@ -340,8 +340,6 @@ export class AuthService {
                     resolved("success");
                 },
                 onFailure: (error) => {
-                    console.error(error.message)
-                    console.error(error.stack)
                     reject(error);
                 }
             });
@@ -362,7 +360,6 @@ export class AuthService {
                 onSuccess: result => {
                     cognitoUser.deleteUser((err, result) => {
                         if (err) {
-                            console.log(err);
                             reject(err);
                         } else {
                             resolved("success");

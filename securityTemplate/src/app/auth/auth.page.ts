@@ -4,6 +4,7 @@ import {AuthService} from './auth.service';
 import {AlertController, LoadingController} from '@ionic/angular';
 import {FormBuilder, FormGroup, NgForm, Validators} from '@angular/forms';
 import {PasswordValidator} from "../validators/password";
+import {ErrorService} from "../shared/error.service";
 
 @Component({
     selector: 'app-auth',
@@ -20,7 +21,8 @@ export class AuthPage implements OnInit {
                 private router: Router,
                 private loadingCtrl: LoadingController,
                 private alertController: AlertController,
-                private formBuilder: FormBuilder) {
+                private formBuilder: FormBuilder,
+                private errorService: ErrorService) {
     }
 
     ngOnInit() {
@@ -74,7 +76,6 @@ export class AuthPage implements OnInit {
                     if (err.code === 'UserNotConfirmedException') {
                         this.promptVerificationCode(username, password);
                     }
-                    console.log(err);
                 });
         });
     }
@@ -94,7 +95,7 @@ export class AuthPage implements OnInit {
                 this.promptVerificationCode(username, password);
             },
             err => {
-                console.log(err);
+                this.errorService.showErrorMessage('An error occurred', err.message, err.code);
             }
         );
 
@@ -148,7 +149,7 @@ export class AuthPage implements OnInit {
                 this.authenticate(username, pw, true);
             },
             err => {
-                alert(err.message);
+                this.errorService.showErrorMessage('An error occurred', err.message, err.code);
             }
         );
     }
@@ -159,7 +160,7 @@ export class AuthPage implements OnInit {
                 this.promptVerificationCode(username, pw);
             },
             err => {
-                console.log(err);
+                this.errorService.showErrorMessage('An error occurred', err.message, err.code);
             }
         );
     }

@@ -78,7 +78,7 @@ export class ForgotPasswordPage implements OnInit {
                 this.authenticate(username, password)
             },
             err => {
-                console.log(err);
+                this.errorService.showErrorMessage('An error occurred', err.message, err.code);
             }
         )
 
@@ -98,7 +98,7 @@ export class ForgotPasswordPage implements OnInit {
                 }, err => {
                     this.isLoading = false;
                     loadingEl.dismiss();
-                    console.log(err);
+                    this.errorService.showErrorMessage('An error occurred', err.message, err.code);
                 });
         });
     }

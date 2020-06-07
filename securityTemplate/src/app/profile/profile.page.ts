@@ -123,7 +123,6 @@ export class ProfilePage implements OnInit {
                         this.router.navigateByUrl('/auth');
                     },
                     err => {
-                        console.log(err);
                         this.deleteRequested = false;
                         this.profileForm.value.password = '';
                         this.errorService.showErrorMessage('Unable to delete profile', err.message, err.code);
