@@ -5,7 +5,7 @@ import {Router} from "@angular/router";
 import {AlertController, LoadingController} from "@ionic/angular";
 import {PasswordValidator} from "../../validators/password";
 import {VerificationCodeValidator} from "../../validators/verificationCode";
-import {ErrorService} from "../../shared/error.service";
+import {ErrorService} from "../../shared/error/error.service";
 
 @Component({
     selector: 'app-forgot-password',

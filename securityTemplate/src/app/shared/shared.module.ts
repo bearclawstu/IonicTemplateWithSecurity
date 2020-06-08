@@ -1,16 +1,16 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ErrorComponent} from "./error/error.component";
 import {IonicModule} from "@ionic/angular";
+import {ImagePickerComponent} from "./pickers/image-picker/image-picker.component";
 
 
 @NgModule({
-    declarations: [ErrorComponent],
+    declarations: [ImagePickerComponent],
     imports: [
         CommonModule,
         IonicModule
     ],
-    exports: [ErrorComponent]
+    exports: [ImagePickerComponent]
 })
 export class SharedModule {
 }

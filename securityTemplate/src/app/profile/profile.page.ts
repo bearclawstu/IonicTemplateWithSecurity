@@ -3,10 +3,12 @@ import {AuthService} from "../auth/auth.service";
 import {ProfileService} from "./profile.service";
 import {UserProfile} from "../models/UserProfile";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {AlertController} from "@ionic/angular";
+import {AlertController, LoadingController} from "@ionic/angular";
 import {Router} from "@angular/router";
 import {PasswordValidator} from "../validators/password";
-import {ErrorService} from "../shared/error.service";
+import {ErrorService} from "../shared/error/error.service";
+import {ImagePickerService} from "../shared/pickers/image-picker.service";
+import {S3Service} from "../shared/s3/s3.service";
 
 @Component({
     selector: 'app-profile',
@@ -19,13 +21,16 @@ export class ProfilePage implements OnInit {
     isLoading = false;
     profileForm: FormGroup;
     deleteRequested = false;
+    profileURL: any;
 
     constructor(private authService: AuthService,
                 private profileService: ProfileService,
                 private alertController: AlertController,
                 private router: Router,
                 private formBuilder: FormBuilder,
-                private errorService: ErrorService) {
+                private errorService: ErrorService,
+                private imagePickerService: ImagePickerService,
+                private s3Service: S3Service) {
     }
 
     ngOnInit() {
@@ -34,6 +39,8 @@ export class ProfilePage implements OnInit {
                 this.username = user.username;
                 this.getProfile();
             });
+
+        this.getSignedURL();
     }
 
     getProfile() {
@@ -47,7 +54,8 @@ export class ProfilePage implements OnInit {
                     name: [this.userProfile.name],
                     email: [this.userProfile.email],
                     created: [this.userProfile.createdAt],
-                    password: ['', Validators.compose([Validators.required, PasswordValidator.isValid])]
+                    password: ['', Validators.compose([Validators.required, PasswordValidator.isValid])],
+                    image: []
                 });
             })
     }
@@ -133,6 +141,68 @@ export class ProfilePage implements OnInit {
 
     onCancelDelete() {
         this.deleteRequested = false;
+    }
+
+    onImagePicked(imageData: string | File) {
+        let imageFile;
+        console.log(typeof imageData);
+        if (typeof imageData === 'string') {
+            try {
+                imageFile = imageData.replace('data:image/jpeg;base64,', '');
+            } catch (error) {
+                console.log(error);
+                return;
+            }
+        } else {
+            imageFile = imageData;
+        }
+
+        this.profileForm.patchValue({image: imageFile});
+        this.uploadPhoto(imageFile);
+    }
+
+    uploadPhoto(imageFile: any) {
+        const loading = this.alertController.create({
+            header: 'Wait',
+            message: 'Uploading...'
+        }).then(loadingEl => {
+            loadingEl.present();
+
+            this.authService
+                .getLoggedOnUserToken()
+                .then(userToken => {
+                    this.s3Service.upload(imageFile, 'profilePhoto', userToken).then(
+                        res => {
+                            loadingEl.dismiss();
+                            alert("Image uploaded!");
+                        },
+                        err => {
+                            loadingEl.dismiss();
+                            alert("Error in image upload!");
+                            console.log(err);
+                        }
+                    );
+                })
+                .catch(err => console.log(err));
+        });
+    }
+
+    getSignedURL() {
+        this.authService
+            .getLoggedOnUserToken()
+            .then(userToken => {
+                this.s3Service.getSignedURL('2763a044-fdd7-403b-b528-26ec473131b6', userToken).then(
+                    res => {
+                        console.log(res);
+                        this.profileURL = res;
+                    },
+                    err => {
+                        alert("Error in image url!");
+                        console.log(err);
+                    }
+                );
+            })
+            .catch(err => console.log(err));
     }
 
 }

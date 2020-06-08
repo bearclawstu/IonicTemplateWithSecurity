@@ -4,7 +4,7 @@ import {AuthService} from './auth.service';
 import {AlertController, LoadingController} from '@ionic/angular';
 import {FormBuilder, FormGroup, NgForm, Validators} from '@angular/forms';
 import {PasswordValidator} from "../validators/password";
-import {ErrorService} from "../shared/error.service";
+import {ErrorService} from "../shared/error/error.service";
 
 @Component({
     selector: 'app-auth',

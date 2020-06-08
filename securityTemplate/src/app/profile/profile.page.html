@@ -15,7 +15,18 @@
     <ion-grid>
       <ion-row>
         <ion-col sizeSm="6" offsetSm="3">
+          <app-image-picker *ngIf="profileURL"
+                  [showPreview]="profileURL"
+                  [avatarOnly]="true"
+                  (imagePick)="onImagePicked($event)"></app-image-picker>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col sizeSm="6" offsetSm="3">
           <ion-list>
+              <ion-avatar slot="start">
+                <img src='{{profileURL}}'>
+              </ion-avatar>
             <ion-item>
               <ion-label position="floating">Username</ion-label>
               <ion-input type="text" formControlName="username" readonly="true"></ion-input>

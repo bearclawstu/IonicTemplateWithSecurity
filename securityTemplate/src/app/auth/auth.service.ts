@@ -189,6 +189,23 @@ export class AuthService {
         });
     }
 
+    getLoggedOnUserToken() {
+        return new Promise((resolved, reject) => {
+            const userPool = new AWSCognito.CognitoUserPool(environment._POOL_DATA);
+            const cognitoUser = userPool.getCurrentUser();
+
+            if (cognitoUser != null) {
+                cognitoUser.getSession(function(err, result) {
+                    if (result) {
+                        resolved(result.getIdToken().getJwtToken());
+                    } else {
+                        reject(err);
+                    }
+                });
+            }
+        });
+    }
+
     private getSession() {
         return new Observable<{ type: string, result: any }>(obs => {
             const userPool = new AWSCognito.CognitoUserPool(environment._POOL_DATA);

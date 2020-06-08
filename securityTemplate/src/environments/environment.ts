@@ -7,7 +7,14 @@ export const environment = {
   _POOL_DATA: {
     UserPoolId: 'eu-west-2_uzfuQf15W',
     ClientId: '2dtf9mmoq4l4ji1m98b5374f6s'
-  }
+  },
+  COGNITO_IDENTITY: {
+    IDENTITY_POOL_ID: 'eu-west-2:65ccc1a4-2551-4eb9-8039-38eb72885024'
+  },
+  S3: {
+    BUCKET_NAME: 'bearclawphotos'
+  },
+  REGION: 'eu-west-2'
 };
 
 /*

@@ -1,19 +1,19 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
-import { ErrorComponent } from './error.component';
+import { ImagePickerComponent } from './image-picker.component';
 
-describe('ErrorComponent', () => {
-  let component: ErrorComponent;
-  let fixture: ComponentFixture<ErrorComponent>;
+describe('ImagePickerComponent', () => {
+  let component: ImagePickerComponent;
+  let fixture: ComponentFixture<ImagePickerComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ErrorComponent ],
+      declarations: [ ImagePickerComponent ],
       imports: [IonicModule.forRoot()]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ErrorComponent);
+    fixture = TestBed.createComponent(ImagePickerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));
