@@ -9,6 +9,7 @@ import {PasswordValidator} from "../validators/password";
 import {ErrorService} from "../shared/error/error.service";
 import {ImagePickerService} from "../shared/pickers/image-picker.service";
 import {S3Service} from "../shared/s3/s3.service";
+import {Subscription} from "rxjs";
 
 @Component({
     selector: 'app-profile',
@@ -22,6 +23,10 @@ export class ProfilePage implements OnInit {
     profileForm: FormGroup;
     deleteRequested = false;
     profileURL: any;
+    imageChanged = false;
+    formEdited = false;
+
+    private imageDataSub: Subscription;
 
     constructor(private authService: AuthService,
                 private profileService: ProfileService,
@@ -40,7 +45,13 @@ export class ProfilePage implements OnInit {
                 this.getProfile();
             });
 
-        this.getSignedURL();
+        this.imageDataSub = this.imagePickerService.imageData.subscribe(image => {
+            if (image) {
+                this.profileURL = image;
+                this.imageChanged = true;
+                this.formEdited = true;
+            }
+        })
     }
 
     getProfile() {
@@ -49,13 +60,14 @@ export class ProfilePage implements OnInit {
             .subscribe(profile => {
                 this.userProfile = profile;
                 this.isLoading = false;
+                this.getSignedURL(this.userProfile.picture);
                 this.profileForm = this.formBuilder.group({
                     username: [this.userProfile.username],
                     name: [this.userProfile.name],
                     email: [this.userProfile.email],
                     created: [this.userProfile.createdAt],
                     password: ['', Validators.compose([Validators.required, PasswordValidator.isValid])],
-                    image: []
+                    image: [this.userProfile.picture]
                 });
             })
     }
@@ -79,7 +91,8 @@ export class ProfilePage implements OnInit {
                     text: 'Ok',
                     handler: data => {
                         this.userProfile.name = data.name;
-                        this.saveProfile();
+                        this.profileForm.patchValue({name: data.name});
+                        this.formEdited = true;
                     }
                 }
             ]
@@ -88,10 +101,20 @@ export class ProfilePage implements OnInit {
         });
     }
 
+    save() {
+        if (this.imageChanged) {
+            this.uploadPhoto(this.profileURL.replace('data:image/jpeg;base64,', ''));
+        } else {
+            this.saveProfile();
+        }
+    }
+
     saveProfile() {
         this.profileService.updateUserProfile(this.userProfile)
             .subscribe(result => {
                 console.log('success');
+                this.formEdited = false;
+                this.imageChanged = false;
             })
     }
 
@@ -136,29 +159,10 @@ export class ProfilePage implements OnInit {
                         this.errorService.showErrorMessage('Unable to delete profile', err.message, err.code);
                     });
             })
-
     }
 
     onCancelDelete() {
         this.deleteRequested = false;
-    }
-
-    onImagePicked(imageData: string | File) {
-        let imageFile;
-        console.log(typeof imageData);
-        if (typeof imageData === 'string') {
-            try {
-                imageFile = imageData.replace('data:image/jpeg;base64,', '');
-            } catch (error) {
-                console.log(error);
-                return;
-            }
-        } else {
-            imageFile = imageData;
-        }
-
-        this.profileForm.patchValue({image: imageFile});
-        this.uploadPhoto(imageFile);
     }
 
     uploadPhoto(imageFile: any) {
@@ -171,10 +175,12 @@ export class ProfilePage implements OnInit {
             this.authService
                 .getLoggedOnUserToken()
                 .then(userToken => {
-                    this.s3Service.upload(imageFile, 'profilePhoto', userToken).then(
-                        res => {
+                    this.s3Service.upload(imageFile, userToken).then(
+                        (res: string) => {
                             loadingEl.dismiss();
-                            alert("Image uploaded!");
+                            this.profileForm.patchValue({image: imageFile});
+                            this.userProfile.picture = res;
+                            this.saveProfile();
                         },
                         err => {
                             loadingEl.dismiss();
@@ -187,11 +193,11 @@ export class ProfilePage implements OnInit {
         });
     }
 
-    getSignedURL() {
+    getSignedURL(imageId: string) {
         this.authService
             .getLoggedOnUserToken()
             .then(userToken => {
-                this.s3Service.getSignedURL('2763a044-fdd7-403b-b528-26ec473131b6', userToken).then(
+                this.s3Service.getSignedURL(imageId, userToken).then(
                     res => {
                         console.log(res);
                         this.profileURL = res;
@@ -203,6 +209,10 @@ export class ProfilePage implements OnInit {
                 );
             })
             .catch(err => console.log(err));
+    }
+
+    onNewImage() {
+        this.imagePickerService.onPickImage();
     }
 
 }

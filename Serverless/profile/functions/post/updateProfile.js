@@ -12,6 +12,7 @@ module.exports.updateProfile = async (event) => {
   try {
     const username = event.body.username;
     const name = event.body.name;
+    const picture = event.body.picture;
 
     const PK = "USER#" + username;
     const SK = "METADATA#" + username;
@@ -22,9 +23,13 @@ module.exports.updateProfile = async (event) => {
         "SK": SK
       },
       TableName: tableName,
-      UpdateExpression: 'set #name = :n',
-      ExpressionAttributeNames: {'#name' : 'name'},
-      ExpressionAttributeValues: {':n' : name}
+      UpdateExpression: 'set #name = :n, #picture = :p',
+      ExpressionAttributeNames: {
+        '#name' : 'name',
+        '#picture' : 'picture'},
+      ExpressionAttributeValues: {
+        ':n' : name,
+        ':p' : picture}
     };
     const result = await ddbDocumentClient.update(params).promise()
     return result;

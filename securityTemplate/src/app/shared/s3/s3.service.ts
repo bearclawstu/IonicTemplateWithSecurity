@@ -10,7 +10,7 @@ export class S3Service {
 
   constructor() { }
 
-  upload(image, imageName, accessToken) {
+  upload(image, accessToken) {
     return new Promise((resolve, reject) => {
       aws.config.region = environment.REGION;
       aws.config.credentials = new aws.CognitoIdentityCredentials({
@@ -19,6 +19,8 @@ export class S3Service {
           [`cognito-idp.${environment.REGION}.amazonaws.com/${environment._POOL_DATA.UserPoolId}`]: accessToken
         }
       });
+
+      const imageUuid = uuidv4();
 
       var s3 = new aws.S3({
         apiVersion: "2006-03-01",
@@ -29,7 +31,7 @@ export class S3Service {
 
       var data = {
         Bucket: environment.S3.BUCKET_NAME,
-        Key: uuidv4(),
+        Key: imageUuid,
         Body: buf,
         ContentEncoding: "base64",
         ContentType: "image/jpeg"
@@ -39,7 +41,7 @@ export class S3Service {
         if (err) {
           reject(err);
         } else {
-          resolve(res);
+          resolve(imageUuid);
         }
       });
     });
