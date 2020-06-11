@@ -7,9 +7,9 @@ import {AlertController, LoadingController} from "@ionic/angular";
 import {Router} from "@angular/router";
 import {PasswordValidator} from "../validators/password";
 import {ErrorService} from "../shared/error/error.service";
-import {ImagePickerService} from "../shared/pickers/image-picker.service";
 import {S3Service} from "../shared/s3/s3.service";
 import {Subscription} from "rxjs";
+import {ImagePickerService} from "../shared/pickers/image-picker.service";
 
 @Component({
     selector: 'app-profile',
@@ -194,12 +194,11 @@ export class ProfilePage implements OnInit {
                         },
                         err => {
                             loadingEl.dismiss();
-                            this.errorService.showErrorMessage("Error in image upload!", err.message);
-                            console.log(err);
+                            this.errorService.showErrorMessage("Error uploading photo", err.message);
                         }
                     );
                 })
-                .catch(err => console.log(err));
+                .catch(err => this.errorService.showErrorMessage('Error uploading photo', err.message));
         });
     }
 
@@ -209,16 +208,14 @@ export class ProfilePage implements OnInit {
             .then(userToken => {
                 this.s3Service.getSignedURL(imageId, userToken).then(
                     res => {
-                        console.log(res);
                         this.profileURL = res;
                     },
                     err => {
                         this.errorService.showErrorMessage("Error displaying image", err.message, err.code);
-                        console.log(err);
                     }
                 );
             })
-            .catch(err => console.log(err));
+            .catch(err => this.errorService.showErrorMessage('Error displaying image', err.message));
     }
 
     onNewImage() {

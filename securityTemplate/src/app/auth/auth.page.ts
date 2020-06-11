@@ -49,7 +49,6 @@ export class AuthPage implements OnInit {
 
     onSignIn() {
         if (!this.signInForm.valid) {
-            console.log('not valid');
             return;
         }
 
@@ -82,7 +81,6 @@ export class AuthPage implements OnInit {
 
     onSignUp() {
         if (!this.signUpForm.valid) {
-            console.log('not valid');
             return;
         }
 

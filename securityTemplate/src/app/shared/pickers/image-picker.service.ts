@@ -69,7 +69,6 @@ export class ImagePickerService {
         width: 600,
         resultType: CameraResultType.Base64
       }).then(image => {
-        console.log(image);
         this._imageData.next('data:image/jpeg;base64,' + image.base64String);
       }).catch(error => {
         if (this.usePicker) {
@@ -79,8 +78,6 @@ export class ImagePickerService {
   }
 
   onFileChosen(event: Event) {
-      console.log('picking file');
-      console.log(event);
       const pickedFile = (event.target as HTMLInputElement).files[0];
       if (!pickedFile) {
         return;
@@ -88,9 +85,7 @@ export class ImagePickerService {
 
       const fr = new FileReader();
       fr.onload = () => {
-        console.log(fr.result);
         const dataUrl = fr.result.toString();
-        console.log(dataUrl);
         this._imageData.next(dataUrl);
       }
       fr.readAsDataURL(pickedFile);

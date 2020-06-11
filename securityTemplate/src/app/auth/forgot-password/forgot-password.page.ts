@@ -44,7 +44,6 @@ export class ForgotPasswordPage implements OnInit {
     onSubmitForgotPassword() {
 
         if (!this.forgotPasswordForm.valid) {
-            console.log('not valid');
             return;
         }
 
@@ -64,7 +63,6 @@ export class ForgotPasswordPage implements OnInit {
     onSubmitResetPassword() {
 
         if (!this.resetPasswordForm.valid) {
-            console.log('not valid');
             return;
         }
 

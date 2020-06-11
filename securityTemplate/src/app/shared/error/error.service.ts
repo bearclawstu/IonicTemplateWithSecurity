@@ -26,7 +26,7 @@ export class ErrorService {
     });
   }
 
-  setMessageFromCode(code: string, message: string) {
+  private setMessageFromCode(code: string, message: string) {
     switch(code) {
       case 'CredentialsError': {
         return 'Invalid credentials';

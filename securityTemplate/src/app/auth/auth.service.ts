@@ -6,15 +6,12 @@ import {User} from './models/User';
 import {BehaviorSubject, from, Observable} from 'rxjs';
 import {Plugins} from '@capacitor/core';
 import {map, tap} from 'rxjs/operators';
+import {ErrorService} from "../shared/error/error.service";
 
 @Injectable({
     providedIn: 'root'
 })
 export class AuthService {
-    private _user = new BehaviorSubject<User>(null);
-
-    private _userIsAuthenticated = false;
-    private _userId = 'p1';
 
     get userIsAuthenticated() {
         return this.getSession().pipe(
@@ -32,7 +29,6 @@ export class AuthService {
         return this.getSession().pipe(
             map(token => {
                 if (token) {
-                    console.log('retrieving token here');
                     return token;
                 } else {
                     return null;
@@ -41,29 +37,7 @@ export class AuthService {
         );
     }
 
-    get token() {
-        return this._user.asObservable().pipe(
-            map(user => {
-                if (user) {
-                    if (user.token) {
-                        return user.token;
-                    } else {
-
-                    }
-                } else {
-                    return null;
-                }
-            })
-        );
-    }
-
-    constructor() {
-    }
-
-    logout() {
-        console.log('logging out');
-        this._user.next(null);
-        Plugins.Storage.remove({key: 'authData'});
+    constructor(private errorService: ErrorService) {
     }
 
     public getCurrentUser() {
@@ -73,7 +47,7 @@ export class AuthService {
             const cognitoUser = userPool.getCurrentUser();
 
             if (!cognitoUser) {
-                console.log('no user');
+                this.errorService.showErrorMessage('Error', 'Unable to find user information');
                 return null;
             }
 
@@ -90,21 +64,15 @@ export class AuthService {
             const cognitoUser = userPool.getCurrentUser();
 
             if (!cognitoUser) {
-                console.log('no user');
+                this.errorService.showErrorMessage('Error', 'Unable to find user information');
                 return null;
             }
-
-            console.log('signing out');
             cognitoUser.signOut();
 
             obs.next(cognitoUser);
             obs.complete();
 
         });
-    }
-
-    set currentUser(id: string) {
-        this._userId = id;
     }
 
     signUp(username, email, password) {
@@ -140,7 +108,6 @@ export class AuthService {
                     reject(err);
                 } else {
                     resolved(result);
-                    console.log('confirmed');
                 }
             });
         });
@@ -163,7 +130,6 @@ export class AuthService {
             cognitoUser.authenticateUser(authDetails, {
                 onSuccess: result => {
                     resolved(result);
-                    this.setUserData(result);
                 },
                 onFailure: err => {
                     reject(err);
@@ -213,7 +179,7 @@ export class AuthService {
             const cognitoUser = userPool.getCurrentUser();
 
             if (!cognitoUser) {
-                console.log('no user');
+                this.errorService.showErrorMessage('Error', 'Unable to find user information');
                 obs.next(null);
                 obs.complete();
                 return;
@@ -226,77 +192,9 @@ export class AuthService {
                 } else {
                     obs.next(data.getIdToken().getJwtToken());
                     obs.complete();
-                    // return data.getAccessToken().getJwtToken();
                 }
             });
         });
-    }
-
-
-    private setUserData(userData: CognitoUserSession) {
-        const user = new User(
-            userData.getAccessToken().payload.client_id,
-            userData.getAccessToken().payload.username,
-            userData.getAccessToken().getJwtToken(),
-            new Date(+userData.getAccessToken().getExpiration() * 1000)
-        );
-        this._user.next(user);
-        this.storeAuthData(
-            user.id,
-            user.token,
-            user.tokenExpirationDate.toISOString(),
-            user.username
-        );
-    }
-
-    autoLogin() {
-        return from(Plugins.Storage.get({key: 'authData'})).pipe(
-            map(storedData => {
-                if (!storedData || !storedData.value) {
-                    return null;
-                }
-                const parsedData = JSON.parse(storedData.value) as {
-                    token: string;
-                    tokenExpirationDate: string;
-                    userId: string;
-                    username: string;
-                };
-                const expirationTime = new Date(parsedData.tokenExpirationDate);
-                if (expirationTime <= new Date()) {
-                    return null;
-                }
-                const user = new User(
-                    parsedData.userId,
-                    parsedData.username,
-                    parsedData.token,
-                    expirationTime
-                );
-                return user;
-            }),
-            tap(user => {
-                if (user) {
-                    this._user.next(user);
-                }
-            }),
-            map(user => {
-                return !!user;
-            })
-        );
-    }
-
-    private storeAuthData(
-        userId: string,
-        token: string,
-        tokenExpirationDate: string,
-        username: string
-    ) {
-        const data = JSON.stringify({
-            userId,
-            token,
-            tokenExpirationDate,
-            username
-        });
-        Plugins.Storage.set({key: 'authData', value: data});
     }
 
     resendVerificationCode(username) {
@@ -330,13 +228,11 @@ export class AuthService {
             // call forgotPassword on cognitoUser
             cognitoUser.forgotPassword({
                 onSuccess: function (result) {
-                    console.log('call result: ' + result);
                 },
                 onFailure: function (err) {
                     reject(err);
                 },
                 inputVerificationCode: function (data) { // this is optional, and likely won't be implemented as in AWS's example (i.e, prompt to get info)
-                    console.log('verification data', data);
                     resolved(data);
                 }
             });

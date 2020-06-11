@@ -16,7 +16,9 @@ This will install the following resources in your AWS account
 * A Cognito User Pool (to hold all your users)
 * A Cognito User Pool Client (for connecting your app to)
 * A Congito Authorizer (for securing your endpoint to only people logged into your app)
+* A Cognito Identity Pool (for allowing users access to secure S3 buckets)
 * An API Gateway with associated Lambda functions
+* An S3 bucket to store users profiles pictures
 
 This will also automatically add a postConfirmation Lambda trigger on the Congito User Pool to automatically add a 
 user to your dynamoDB table once they are verified.
@@ -36,14 +38,17 @@ a stack named 'securityTemplate-dev'.  Click on that and then click on outputs a
 * ApiUrl
 * UserPoolClientId
 * UserPoolId
+* ProfileBucketName
+* IdentityPoolId
 
+(alternatively these outputs are displayed on the CLI that ci-deploy.sh is run on)
 For Ionic, run the following command in the securityTemplate directory
 ```
 npm install
 ```
 
 In the following files, replace the relevant data with your values from the cloud formation output  
-* src/environments/environments.ts (UserPoolId & ClientId)
+* src/environments/environments.ts (UserPoolId, ClientId, identityPoolId, bucketName)
 * src/app/interceptor/token.interceptor.ts (baseUrl)
 
 Then in the securityTemplate directory run:
