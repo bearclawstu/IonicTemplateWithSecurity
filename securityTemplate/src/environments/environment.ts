@@ -9,10 +9,10 @@ export const environment = {
     ClientId: '2dtf9mmoq4l4ji1m98b5374f6s'
   },
   COGNITO_IDENTITY: {
-    IDENTITY_POOL_ID: 'eu-west-2:65ccc1a4-2551-4eb9-8039-38eb72885024'
+    IDENTITY_POOL_ID: 'eu-west-2:ff92f4a5-5be2-422e-b8ad-fdbc5fccfea3'
   },
   S3: {
-    BUCKET_NAME: 'bearclawphotos'
+    BUCKET_NAME: 'securitytemplate-dev-profilebucket-2v406dsrc4w5'
   },
   REGION: 'eu-west-2'
 };

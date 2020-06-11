@@ -9,6 +9,9 @@ export class ErrorService {
   constructor(private alertCtrl: AlertController) { }
 
   showErrorMessage(header: string, message: string, code?: string) {
+    if (code) {
+      message = this.setMessageFromCode(code, message);
+    }
     const alert = this.alertCtrl.create({
       header: header,
       message: message,
@@ -21,5 +24,16 @@ export class ErrorService {
     }).then(alertEl => {
       alertEl.present();
     });
+  }
+
+  setMessageFromCode(code: string, message: string) {
+    switch(code) {
+      case 'CredentialsError': {
+        return 'Invalid credentials';
+      }
+      default: {
+        return message;
+      }
+    }
   }
 }

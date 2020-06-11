@@ -110,12 +110,22 @@ export class ProfilePage implements OnInit {
     }
 
     saveProfile() {
-        this.profileService.updateUserProfile(this.userProfile)
-            .subscribe(result => {
-                console.log('success');
-                this.formEdited = false;
-                this.imageChanged = false;
-            })
+        const loading = this.alertController.create({
+            header: 'Wait',
+            message: 'Saving profile...'
+        }).then(loadingEl => {
+            loadingEl.present();
+
+            this.profileService.updateUserProfile(this.userProfile)
+                .subscribe(result => {
+                    this.formEdited = false;
+                    this.imageChanged = false;
+                    loadingEl.dismiss();
+                }, error => {
+                    this.errorService.showErrorMessage('Error saving profile', error.message, null);
+                    loadingEl.dismiss();
+                })
+        })
     }
 
     // TODO add an email validation to delete account?
@@ -184,7 +194,7 @@ export class ProfilePage implements OnInit {
                         },
                         err => {
                             loadingEl.dismiss();
-                            alert("Error in image upload!");
+                            this.errorService.showErrorMessage("Error in image upload!", err.message);
                             console.log(err);
                         }
                     );
@@ -203,7 +213,7 @@ export class ProfilePage implements OnInit {
                         this.profileURL = res;
                     },
                     err => {
-                        alert("Error in image url!");
+                        this.errorService.showErrorMessage("Error displaying image", err.message, err.code);
                         console.log(err);
                     }
                 );
