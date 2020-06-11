@@ -16,8 +16,10 @@ const routes: Routes = [
     path: '',
     redirectTo: 'home',
     pathMatch: 'full'
-  },  {
+  },
+  {
     path: 'profile',
+    canLoad: [AuthGuard],
     loadChildren: () => import('./profile/profile.module').then( m => m.ProfilePageModule)
   },
   {

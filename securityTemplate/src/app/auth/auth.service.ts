@@ -47,7 +47,6 @@ export class AuthService {
             const cognitoUser = userPool.getCurrentUser();
 
             if (!cognitoUser) {
-                this.errorService.showErrorMessage('Error', 'Unable to find user information');
                 return null;
             }
 
@@ -64,7 +63,6 @@ export class AuthService {
             const cognitoUser = userPool.getCurrentUser();
 
             if (!cognitoUser) {
-                this.errorService.showErrorMessage('Error', 'Unable to find user information');
                 return null;
             }
             cognitoUser.signOut();
@@ -179,7 +177,6 @@ export class AuthService {
             const cognitoUser = userPool.getCurrentUser();
 
             if (!cognitoUser) {
-                this.errorService.showErrorMessage('Error', 'Unable to find user information');
                 obs.next(null);
                 obs.complete();
                 return;
