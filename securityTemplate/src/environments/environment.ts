@@ -14,7 +14,8 @@ export const environment = {
   S3: {
     BUCKET_NAME: 'securitytemplate-dev-profilebucket-2v406dsrc4w5'
   },
-  REGION: 'eu-west-2'
+  REGION: 'eu-west-2',
+  BASE_URL: 'https://vx617w4t4k.execute-api.eu-west-2.amazonaws.com/dev/'
 };
 
 /*

@@ -13,10 +13,11 @@ import {
 } from '@angular/router';
 import {Injectable} from "@angular/core";
 import {AuthService} from "../auth/auth.service";
+import {environment} from "../../environments/environment";
 
 @Injectable()
 export class TokenInterceptor implements HttpInterceptor {
-    baseUrl = 'https://vx617w4t4k.execute-api.eu-west-2.amazonaws.com/dev/';
+    baseUrl = environment.BASE_URL;
 
     constructor(private router: Router,
                 private authService: AuthService) {

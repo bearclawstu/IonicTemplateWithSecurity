@@ -60,7 +60,15 @@ export class ProfilePage implements OnInit {
             .subscribe(profile => {
                 this.userProfile = profile;
                 this.isLoading = false;
-                this.getSignedURL(this.userProfile.picture);
+                this.s3Service.getSignedURL(this.userProfile.picture).then(
+                    res => {
+                        this.profileURL = res;
+                    },
+                    err => {
+                        console.log(err);
+                        this.errorService.showErrorMessage("Error displaying image", err.message, err.code);
+                    }
+                );
                 this.profileForm = this.formBuilder.group({
                     username: [this.userProfile.username],
                     name: [this.userProfile.name],
@@ -200,22 +208,6 @@ export class ProfilePage implements OnInit {
                 })
                 .catch(err => this.errorService.showErrorMessage('Error uploading photo', err.message));
         });
-    }
-
-    getSignedURL(imageId: string) {
-        this.authService
-            .getLoggedOnUserToken()
-            .then(userToken => {
-                this.s3Service.getSignedURL(imageId, userToken).then(
-                    res => {
-                        this.profileURL = res;
-                    },
-                    err => {
-                        this.errorService.showErrorMessage("Error displaying image", err.message, err.code);
-                    }
-                );
-            })
-            .catch(err => this.errorService.showErrorMessage('Error displaying image', err.message));
     }
 
     onNewImage() {
