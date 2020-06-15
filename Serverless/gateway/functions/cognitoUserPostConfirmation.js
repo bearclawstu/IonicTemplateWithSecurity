@@ -40,7 +40,12 @@ exports.handler = async (event, context) => {
         try {
             await ddbDocumentClient.put(ddbParams).promise();
         } catch (err) {
-            console.log("Error", err);
+            const customError = {
+                code: err.code,
+                type: 'customLambdaError',
+                message: "Unable to retrieve groups"
+            };
+            context.fail(JSON.stringify(customError));
         }
 
         context.done(null, event);
