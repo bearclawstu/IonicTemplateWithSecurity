@@ -35,7 +35,7 @@ ci-deploy.sh
 
 Once the deployment has finished, go into the cloud formation service of your AWS account and you should see 
 a stack named 'securityTemplate-dev'.  Click on that and then click on outputs and make note of:
-* ApiUrl
+* ApiUrl (make sure to add a trailing '/' to this)
 * UserPoolClientId
 * UserPoolId
 * ProfileBucketName
@@ -49,8 +49,7 @@ npm install
 ```
 
 In the following files, replace the relevant data with your values from the cloud formation output  
-* src/environments/environments.ts (UserPoolId, ClientId, identityPoolId, bucketName)
-* src/app/interceptor/token.interceptor.ts (baseUrl)
+* src/environments/environments.ts (UserPoolId, ClientId, identityPoolId, bucketName, baseUrl)
 
 Then in the securityTemplate directory run:
 ```
@@ -62,7 +61,8 @@ Once the email address has been verified, it will take you to the home page and
 a user will have been added to your dynamoDB table.
 
 ### Clean up
-To remove all of the resources in AWS, run the following in the serverless direcrtory
+To remove all of the resources in AWS, run the following in the serverless direcrtory  
+(you will need to manually empty your profile bucket for the decomission to run succesfully)
 ```
 ci-decomission.sh
 ```

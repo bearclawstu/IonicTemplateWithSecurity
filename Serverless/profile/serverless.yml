@@ -1,8 +1,5 @@
 service: securityTemplate-profile
 
-org: bearclawsolutions
-app: security-template
-
 custom:
   stage: ${opt:stage, self:provider.stage}
   serviceName: securityTemplate-${self:custom.stage}

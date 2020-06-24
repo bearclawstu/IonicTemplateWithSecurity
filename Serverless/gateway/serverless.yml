@@ -1,8 +1,5 @@
 service: securityTemplate
 
-org: bearclawsolutions
-app: security-template
-
 package:
   individually: true
 

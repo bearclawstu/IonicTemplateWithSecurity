@@ -5,17 +5,17 @@
 export const environment = {
   production: false,
   _POOL_DATA: {
-    UserPoolId: 'eu-west-2_uzfuQf15W',
-    ClientId: '2dtf9mmoq4l4ji1m98b5374f6s'
+    UserPoolId: '<PoolId>',
+    ClientId: '<clientId>'
   },
   COGNITO_IDENTITY: {
-    IDENTITY_POOL_ID: 'eu-west-2:ff92f4a5-5be2-422e-b8ad-fdbc5fccfea3'
+    IDENTITY_POOL_ID: '<identityPoolId>'
   },
   S3: {
-    BUCKET_NAME: 'securitytemplate-dev-profilebucket-2v406dsrc4w5'
+    BUCKET_NAME: '<BucketName>'
   },
-  REGION: 'eu-west-2',
-  BASE_URL: 'https://vx617w4t4k.execute-api.eu-west-2.amazonaws.com/dev/'
+  REGION: '<Region>',
+  BASE_URL: '<BaseUrl>'
 };
 
 /*
